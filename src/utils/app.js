@@ -21,6 +21,8 @@ app.use('/api/farmer', require('../routes/farmer'));
 app.use('/api/crop', require('../routes/crop'));
 app.use('/api/farmer/auth', require('../routes/farmerAuth'));
 app.use('/api/vendor/auth', require('../routes/vendorAuth'));
+app.use('/api/vendor/crops', require('../routes/cropFeed'));
+
 
 
 
