@@ -28,10 +28,15 @@ exports.createCropListing = async (req, res, next) => {
       return res.status(404).json({ message: 'Farmer not found' });
     }
 
+    // ✅ Normalize photos from base64 or provided list
+    const photos = Array.isArray(value.photos) ? value.photos.filter(Boolean) : [];
+    if (value.photoBase64) photos.unshift(value.photoBase64);
+
     // ✅ Create crop listing
     const crop = new CropListing({
       farmerId,
       ...value,
+      ...(photos.length ? { photos } : {}),
 
       // 📍 Auto location from farmer profile
       village: farmer.village,

@@ -11,8 +11,8 @@ const app = express();
 connectDB();
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('dev'));
 
 
@@ -22,11 +22,12 @@ app.use('/api/crop', require('../routes/crop'));
 app.use('/api/farmer/auth', require('../routes/farmerAuth'));
 app.use('/api/vendor/auth', require('../routes/vendorAuth'));
 app.use('/api/vendor/crops', require('../routes/cropFeed'));
-
-
-
-
-
+app.use('/api/vendor', require('../routes/vendorProfile'));
+app.use('/api/dashboard', require('../routes/dashboard'));
+app.use('/api/offers', require('../routes/offer'));
+app.use('/api/payment', require('../routes/payment'));
+app.use('/api/market', require('../routes/market'));
+app.use('/api/notifications', require('../routes/notification'));
 
 
 app.get('/', (req, res) => res.send('welcome to server'));

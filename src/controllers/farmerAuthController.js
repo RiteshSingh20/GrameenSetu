@@ -3,8 +3,11 @@ const Farmer = require('../models/Farmer');
 const Otp = require('../models/Otp');
 const { generateOtp } = require('../utils/otpHelper');
 const { sendOtpEmail } = require('../utils/sendEmail');
+const { generateAccessToken, generateRefreshToken, saveRefreshToken, verifyRefreshToken, revokeRefreshToken } = require('../utils/tokenUtils');
 
-
+/**
+ * REQUEST OTP FOR LOGIN
+ */
 exports.requestOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -21,10 +24,10 @@ exports.requestOtp = async (req, res) => {
     const otp = generateOtp();
 
     await Otp.create({
-  email,
-  code: otp,
-  expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-});
+      email,
+      code: otp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    });
 
     // 📧 Send OTP to farmer email
     await sendOtpEmail(email, otp);
@@ -36,7 +39,9 @@ exports.requestOtp = async (req, res) => {
   }
 };
 
-
+/**
+ * VERIFY OTP AND LOGIN
+ */
 exports.verifyOtp = async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -51,20 +56,73 @@ exports.verifyOtp = async (req, res) => {
       return res.status(404).json({ message: 'Farmer not found' });
     }
 
-    const token = jwt.sign(
-      { id: farmer._id, type: 'farmer' },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // Generate tokens
+    const accessToken = generateAccessToken(farmer._id, 'farmer');
+    const refreshToken = generateRefreshToken(farmer._id, 'farmer');
 
+    // Save refresh token to database
+    await saveRefreshToken(farmer._id, 'Farmer', refreshToken);
+
+    // Delete used OTP
     await Otp.deleteMany({ email });
 
     res.json({
       message: 'Farmer login successful',
-      token,
-      farmerId: farmer._id
+      accessToken,
+      refreshToken,
+      farmerId: farmer._id,
+      expiresIn: 900 // 15 minutes in seconds
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'OTP verification failed' });
+  }
+};
+
+/**
+ * REFRESH ACCESS TOKEN
+ */
+exports.refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    // Verify refresh token
+    const payload = await verifyRefreshToken(refreshToken);
+
+    // Generate new access token
+    const newAccessToken = generateAccessToken(payload.id, payload.type);
+
+    res.json({
+      accessToken: newAccessToken,
+      expiresIn: 900 // 15 minutes in seconds
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ message: 'Invalid or expired refresh token' });
+  }
+};
+
+/**
+ * LOGOUT (Revoke refresh token)
+ */
+exports.logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    // Revoke refresh token
+    await revokeRefreshToken(refreshToken);
+
+    res.json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Logout failed' });
   }
 };

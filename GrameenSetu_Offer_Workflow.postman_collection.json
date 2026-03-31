@@ -1,0 +1,365 @@
+{
+  "info": {
+    "name": "GrameenSetu Offer Workflow",
+    "description": "Complete workflow: Vendor → Offer → Farmer Response → Delivery → Payment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1️⃣ VENDOR VIEWS CROPS",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:4000/api/vendor/crops/all",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "vendor", "crops", "all"]
+        },
+        "description": "Vendor sees all active crops with farmer details"
+      },
+      "response": []
+    },
+    {
+      "name": "2️⃣ VENDOR SENDS OFFER (WITH BID)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cropId\": \"CROP_ID_HERE\",\n  \"offeredPrice\": 2300\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/send",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "send"]
+        },
+        "description": "Vendor sends offer with custom bid amount"
+      },
+      "response": []
+    },
+    {
+      "name": "2️⃣ VENDOR SENDS OFFER (WITHOUT BID)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cropId\": \"CROP_ID_HERE\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/send",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "send"]
+        },
+        "description": "Vendor sends offer without bid (uses crop's expected price)"
+      },
+      "response": []
+    },
+    {
+      "name": "3️⃣ FARMER VIEWS OFFERS",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <FARMER_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:4000/api/offers/farmer",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "farmer"]
+        },
+        "description": "Farmer sees all offers on their crops"
+      },
+      "response": []
+    },
+    {
+      "name": "4️⃣ FARMER ACCEPTS OFFER",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <FARMER_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offerId\": \"OFFER_ID_HERE\",\n  \"action\": \"ACCEPT\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/respond",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "respond"]
+        },
+        "description": "Farmer accepts vendor's offer"
+      },
+      "response": []
+    },
+    {
+      "name": "4️⃣ FARMER REJECTS OFFER",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <FARMER_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offerId\": \"OFFER_ID_HERE\",\n  \"action\": \"REJECT\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/respond",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "respond"]
+        },
+        "description": "Farmer rejects vendor's offer"
+      },
+      "response": []
+    },
+    {
+      "name": "4️⃣ FARMER NEGOTIATES OFFER",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <FARMER_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offerId\": \"OFFER_ID_HERE\",\n  \"action\": \"NEGOTIATE\",\n  \"newPrice\": 2400\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/respond",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "respond"]
+        },
+        "description": "Farmer negotiates with new price"
+      },
+      "response": []
+    },
+    {
+      "name": "5️⃣ VENDOR SELECTS DELIVERY",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offerId\": \"OFFER_ID_HERE\",\n  \"vehicleType\": \"truck\",\n  \"distanceKm\": 60\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/delivery",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "delivery"]
+        },
+        "description": "Vendor selects delivery vehicle and distance. System calculates time and fare."
+      },
+      "response": []
+    },
+    {
+      "name": "5️⃣ VENDOR SELECTS DELIVERY (TEMPO)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offerId\": \"OFFER_ID_HERE\",\n  \"vehicleType\": \"tempo\",\n  \"distanceKm\": 45\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/delivery",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "delivery"]
+        },
+        "description": "Vendor selects tempo for delivery"
+      },
+      "response": []
+    },
+    {
+      "name": "5️⃣ VENDOR SELECTS DELIVERY (RICKSHAW)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offerId\": \"OFFER_ID_HERE\",\n  \"vehicleType\": \"rickshaw\",\n  \"distanceKm\": 20\n}"
+        },
+        "url": {
+          "raw": "http://localhost:4000/api/offers/delivery",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "delivery"]
+        },
+        "description": "Vendor selects rickshaw for delivery"
+      },
+      "response": []
+    },
+    {
+      "name": "6️⃣ VENDOR PROCEEDS TO PAYMENT",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:4000/api/offers/payment/OFFER_ID_HERE",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "payment", "OFFER_ID_HERE"]
+        },
+        "description": "Vendor gets payment details and redirects to payment gateway"
+      },
+      "response": []
+    },
+    {
+      "name": "VENDOR GET ALL SENT OFFERS",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer <VENDOR_TOKEN>",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:4000/api/offers/vendor",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["api", "offers", "vendor"]
+        },
+        "description": "Vendor sees all offers they have sent"
+      },
+      "response": []
+    }
+  ]
+}

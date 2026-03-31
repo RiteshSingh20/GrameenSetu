@@ -21,7 +21,10 @@ const cropListingSchema = Joi.object({
 
   pickupType: Joi.string()
     .valid('Farm Pickup', 'Market Drop')
-    .optional()
+    .optional(),
+
+  photoBase64: Joi.string().optional(),
+  photos: Joi.array().items(Joi.string()).optional()
 });
 
 module.exports = { cropListingSchema };

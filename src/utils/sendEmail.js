@@ -23,3 +23,23 @@ exports.sendOtpEmail = async (toEmail, otp) => {
     `
   });
 };
+
+
+exports.sendEmail = async (toEmail, subject, message) => {
+  try {
+    await transporter.sendMail({
+      from: `"GrameenSetu" <${process.env.NOTIFY_EMAIL}>`,
+      to: toEmail,
+      subject: subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>GrameenSetu</h2>
+          <p>${message}</p>
+          <p>Best regards,<br/>GrameenSetu Team</p>
+        </div>
+      `
+    });
+  } catch (err) {
+    console.error('Email send error:', err);
+  }
+};

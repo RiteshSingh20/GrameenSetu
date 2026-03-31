@@ -22,6 +22,7 @@ const CropListingSchema = new mongoose.Schema(
     },
 
     expectedPrice: { type: Number }, // optional
+    finalPrice: { type: Number }, // set when sold
     harvestDate: { type: Date },
 
     qualityGrade: {
@@ -66,7 +67,8 @@ const CropListingSchema = new mongoose.Schema(
       type: String,
       enum: ['Active', 'Sold', 'Expired'],
       default: 'Active'
-    }
+    },
+    soldAt: { type: Date }
   },
   { timestamps: true }
 );

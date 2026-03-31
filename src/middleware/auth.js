@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Farmer = require('../models/Farmer');
+const Farmer = require('../models/farmer');
 const Vendor = require('../models/Vendor');
 
 /**
@@ -20,31 +20,30 @@ module.exports = (allowedTypes = []) => {
         return res.status(401).json({ message: 'Invalid Authorization format' });
       }
 
-      // 🔐 Verify JWT
       const payload = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = payload;
 
-      // 🚫 Authorization check (if route is restricted)
-      if (allowedTypes.length && !allowedTypes.includes(payload.type)) {
+      // Support both token shapes: { id, type } and { id, role }.
+      const userType = payload.type || payload.role;
+      const userId = payload.id || payload.userId;
+      req.user = { ...payload, type: userType, id: userId };
+
+      if (allowedTypes.length && !allowedTypes.includes(userType)) {
         return res.status(403).json({ message: 'Access denied' });
       }
 
-      // 🔎 Fetch actual user from DB
       let userDoc = null;
 
-      if (payload.type === 'farmer') {
-        userDoc = await Farmer.findById(payload.id);
-      } else if (payload.type === 'vendor') {
-        userDoc = await Vendor.findById(payload.id);
+      if (userType === 'farmer') {
+        userDoc = await Farmer.findById(userId);
+      } else if (userType === 'vendor') {
+        userDoc = await Vendor.findById(userId);
       }
 
       if (!userDoc) {
         return res.status(401).json({ message: 'Invalid token user' });
       }
 
-      // attach full document if needed
       req.userDoc = userDoc;
-
       next();
     } catch (err) {
       console.error('Auth error:', err.message);
