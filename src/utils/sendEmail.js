@@ -6,10 +6,10 @@ const buildTransporter = () => {
   const host = process.env.NOTIFY_EMAIL_HOST || 'smtp.gmail.com';
   const port = process.env.NOTIFY_EMAIL_PORT
     ? Number(process.env.NOTIFY_EMAIL_PORT)
-    : 577;
+    : 587;
   const secure = process.env.NOTIFY_EMAIL_SECURE
     ? process.env.NOTIFY_EMAIL_SECURE === 'true'
-    : port === 577;
+    : port === 587;
   const service = process.env.NOTIFY_EMAIL_SERVICE;
 
   const transportOptions = service
