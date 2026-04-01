@@ -40,22 +40,7 @@ const vendorSignupSchema = Joi.object({
 
   password: Joi.string().min(6).optional().allow('', null),
 
-  preferredLanguage: Joi.string()
-    .valid(
-      'en',
-      'hi',
-      'mr',
-      'ta',
-      'te',
-      'kn',
-      'ml',
-      'bn',
-      'gu',
-      'pa',
-      'or',
-      'bh'
-    )
-    .optional(),
+  preferredLanguage: Joi.string().min(1).optional(),
 
   /* ---------- BUSINESS ---------- */
   businessName: Joi.string().min(2).max(150).required(),
@@ -101,22 +86,7 @@ const farmerSignupSchema = Joi.object({
 
     email: Joi.string().email().optional().allow('', null),
 
-    preferredLanguage: Joi.string()
-      .valid(
-        'en', // English
-        'hi', // Hindi
-        'mr', // Marathi
-        'ta', // Tamil
-        'te', // Telugu
-        'kn', // Kannada
-        'ml', // Malayalam
-        'bn', // Bengali
-        'gu', // Gujarati
-        'pa', // Punjabi
-        'or', // Oriya (Odia)
-        'bh'  // Bhojpuri
-      )
-      .required()
+    preferredLanguage: Joi.string().min(1).required()
   }).required(),
 
   /* ---------- LOCATION ---------- */
@@ -151,7 +121,7 @@ const farmerSignupSchema = Joi.object({
     landSize: Joi.object({
       value: Joi.number().positive().required(),
       unit: Joi.string()
-        .valid('Acre', 'Hectare')
+        .valid('Acre', 'Hectare', 'Gutha')
         .required()
     }).required(),
 
@@ -160,7 +130,7 @@ const farmerSignupSchema = Joi.object({
       .required(),
 
     harvestSeason: Joi.string()
-      .valid('Kharif', 'Rabi', 'Zaid')
+      .valid('Kharif', 'Rabi', 'Ravi', 'Zaid')
       .required()
   }).required(),
 

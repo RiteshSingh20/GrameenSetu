@@ -13,24 +13,7 @@ const FarmerSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
 
 
-    preferredLanguage: {
-      type: String,
-      enum: [
-        'en', // English
-        'hi', // Hindi
-        'mr', // Marathi
-        'ta', // Tamil
-        'te', // Telugu
-        'kn', // Kannada
-        'ml', // Malayalam
-        'bn', // Bengali
-        'gu', // Gujarati
-        'pa', // Punjabi
-        'or', // Oriya (Odia)
-        'bh'  // Bhojpuri
-      ],
-      default: 'hi'
-    },
+    preferredLanguage: { type: String, default: 'hi' },
 
     profilePhotoUrl: { type: String },
 
@@ -92,7 +75,7 @@ const FarmerSchema = new mongoose.Schema(
       value: { type: Number, required: true },
       unit: {
         type: String,
-        enum: ['Acre', 'Hectare'],
+        enum: ['Acre', 'Hectare', 'Gutha'],
         required: true
       }
     },
@@ -105,7 +88,7 @@ const FarmerSchema = new mongoose.Schema(
 
     harvestSeason: {
       type: String,
-      enum: ['Kharif', 'Rabi', 'Zaid'],
+      enum: ['Kharif', 'Rabi', 'Ravi', 'Zaid'],
       required: true
     },
 

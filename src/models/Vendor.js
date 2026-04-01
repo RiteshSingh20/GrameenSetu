@@ -5,7 +5,7 @@ const VendorSchema = new mongoose.Schema({
   mobile: { type: String, required: true, unique: true }, 
   email: { type: String, trim: true, lowercase: true },
   passwordHash: { type: String }, // optional if OTP-only
-  preferredLanguage: { type: String, enum: ['en', 'hi', 'other'], default: 'en' },
+  preferredLanguage: { type: String, default: 'en' },
 
   // Business details
   businessName: { type: String },

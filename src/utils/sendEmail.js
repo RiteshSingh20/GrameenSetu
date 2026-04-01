@@ -1,21 +1,31 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: process.env.NOTIFY_EMAIL_HOST || 'smtp.gmail.com',
+  port: process.env.NOTIFY_EMAIL_PORT ? Number(process.env.NOTIFY_EMAIL_PORT) : 465,
+  secure: process.env.NOTIFY_EMAIL_SECURE
+    ? process.env.NOTIFY_EMAIL_SECURE === 'true'
+    : true,
   auth: {
     user: process.env.NOTIFY_EMAIL,
     pass: process.env.NOTIFY_EMAIL_PASS
-  }
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000
 });
 
 exports.sendOtpEmail = async (toEmail, otp) => {
+  if (!process.env.NOTIFY_EMAIL || !process.env.NOTIFY_EMAIL_PASS) {
+    throw new Error('Email credentials not configured');
+  }
   await transporter.sendMail({
     from: `"GrameenSetu" <${process.env.NOTIFY_EMAIL}>`,
     to: toEmail,
-    subject: '🔐 GrameenSetu Login OTP',
+    subject: 'GrameenSetu Login OTP',
     html: `
       <h2>GrameenSetu Login</h2>
-      <h2>Dear Farmer 😊</h2>
+      <h2>Dear Farmer</h2>
       <h3>Do not Share with anyone!</h3>
       <p>Your OTP is:</p>
       <h1>${otp}</h1>
@@ -23,7 +33,6 @@ exports.sendOtpEmail = async (toEmail, otp) => {
     `
   });
 };
-
 
 exports.sendEmail = async (toEmail, subject, message) => {
   try {

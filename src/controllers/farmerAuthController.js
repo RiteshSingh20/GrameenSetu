@@ -3,7 +3,13 @@ const Farmer = require('../models/Farmer');
 const Otp = require('../models/Otp');
 const { generateOtp } = require('../utils/otpHelper');
 const { sendOtpEmail } = require('../utils/sendEmail');
-const { generateAccessToken, generateRefreshToken, saveRefreshToken, verifyRefreshToken, revokeRefreshToken } = require('../utils/tokenUtils');
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  saveRefreshToken,
+  verifyRefreshToken,
+  revokeRefreshToken
+} = require('../utils/tokenUtils');
 
 /**
  * REQUEST OTP FOR LOGIN
@@ -29,8 +35,12 @@ exports.requestOtp = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000)
     });
 
-    // 📧 Send OTP to farmer email
-    await sendOtpEmail(email, otp);
+    try {
+      await sendOtpEmail(email, otp);
+    } catch (mailErr) {
+      console.error('OTP email send failed:', mailErr);
+      return res.status(502).json({ message: 'Email service unavailable. Please try again later.' });
+    }
 
     res.json({ message: 'OTP sent to registered email' });
   } catch (err) {
