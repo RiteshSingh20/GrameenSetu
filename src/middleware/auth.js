@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Farmer = require('../models/farmer');
+const Farmer = require('../models/Farmer');
 const Vendor = require('../models/Vendor');
 
 /**

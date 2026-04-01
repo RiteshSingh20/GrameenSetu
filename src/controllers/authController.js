@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
 
 const Vendor = require('../models/Vendor');
-const Farmer = require('../models/farmer');
+const Farmer = require('../models/Farmer');
 const Otp = require('../models/Otp');
 const { vendorSignupSchema, vendorLoginSchema, mobileSchema, otpSchema } = require('../utils/validators');
 

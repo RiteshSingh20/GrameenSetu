@@ -1,7 +1,7 @@
 const Offer = require('../models/Offer');
 const CropListing = require('../models/CropListing');
 const Vendor = require('../models/Vendor');
-const Farmer = require('../models/farmer');
+const Farmer = require('../models/Farmer');
 const { calculateDelivery } = require('../utils/deliveryCalculator');
 const { sendEmail } = require('../utils/sendEmail');
 
