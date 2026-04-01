@@ -1,26 +1,51 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.NOTIFY_EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.NOTIFY_EMAIL_PORT ? Number(process.env.NOTIFY_EMAIL_PORT) : 465,
-  secure: process.env.NOTIFY_EMAIL_SECURE
+let cachedTransporter = null;
+
+const buildTransporter = () => {
+  const host = process.env.NOTIFY_EMAIL_HOST || 'smtp.gmail.com';
+  const port = process.env.NOTIFY_EMAIL_PORT
+    ? Number(process.env.NOTIFY_EMAIL_PORT)
+    : 577;
+  const secure = process.env.NOTIFY_EMAIL_SECURE
     ? process.env.NOTIFY_EMAIL_SECURE === 'true'
-    : true,
-  auth: {
-    user: process.env.NOTIFY_EMAIL,
-    pass: process.env.NOTIFY_EMAIL_PASS
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 20000
-});
+    : port === 577;
+  const service = process.env.NOTIFY_EMAIL_SERVICE;
+
+  const transportOptions = service
+    ? { service }
+    : { host, port, secure };
+
+  return nodemailer.createTransport({
+    ...transportOptions,
+    auth: {
+      user: process.env.NOTIFY_EMAIL,
+      pass: process.env.NOTIFY_EMAIL_PASS
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000
+  });
+};
+
+const getTransporter = () => {
+  if (!cachedTransporter) {
+    cachedTransporter = buildTransporter();
+  }
+  return cachedTransporter;
+};
+
+const getFromAddress = () => {
+  return process.env.NOTIFY_EMAIL_FROM || process.env.NOTIFY_EMAIL;
+};
 
 exports.sendOtpEmail = async (toEmail, otp) => {
   if (!process.env.NOTIFY_EMAIL || !process.env.NOTIFY_EMAIL_PASS) {
     throw new Error('Email credentials not configured');
   }
+  const transporter = getTransporter();
   await transporter.sendMail({
-    from: `"GrameenSetu" <${process.env.NOTIFY_EMAIL}>`,
+    from: `"GrameenSetu" <${getFromAddress()}>`,
     to: toEmail,
     subject: 'GrameenSetu Login OTP',
     html: `
@@ -36,8 +61,12 @@ exports.sendOtpEmail = async (toEmail, otp) => {
 
 exports.sendEmail = async (toEmail, subject, message) => {
   try {
+    if (!process.env.NOTIFY_EMAIL || !process.env.NOTIFY_EMAIL_PASS) {
+      throw new Error('Email credentials not configured');
+    }
+    const transporter = getTransporter();
     await transporter.sendMail({
-      from: `"GrameenSetu" <${process.env.NOTIFY_EMAIL}>`,
+      from: `"GrameenSetu" <${getFromAddress()}>`,
       to: toEmail,
       subject: subject,
       html: `

@@ -28,25 +28,38 @@ exports.requestOtp = async (req, res) => {
     }
 
     const otp = generateOtp();
+    const otpTtlMinutes = Number(process.env.OTP_TTL_MINUTES) || 10;
 
     await Otp.create({
       email,
       code: otp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+      expiresAt: new Date(Date.now() + otpTtlMinutes * 60 * 1000)
     });
 
     try {
       await sendOtpEmail(email, otp);
     } catch (mailErr) {
-      console.error('❌ FULL EMAIL ERROR:', mailErr);
+      console.error('EMAIL SEND ERROR:', {
+        message: mailErr?.message,
+        code: mailErr?.code,
+        responseCode: mailErr?.responseCode,
+        command: mailErr?.command
+      });
       if (process.env.OTP_FALLBACK === 'true') {
         return res.json({
           message: 'OTP generated (email delivery skipped)',
           otp,
-          expiresInMinutes: 10
+          expiresInMinutes: otpTtlMinutes
         });
       }
-      return res.status(502).json({ message: 'Email service unavailable. Please try again later.' });
+      const fallbackCode =
+        mailErr?.message === 'Email credentials not configured'
+          ? 'EMAIL_CREDENTIALS_MISSING'
+          : 'EMAIL_SEND_FAILED';
+      return res.status(502).json({
+        message: 'Email service unavailable. Please try again later.',
+        errorCode: mailErr?.code || mailErr?.responseCode || fallbackCode
+      });
     }
 
     res.json({ message: 'OTP sent to registered email' });
