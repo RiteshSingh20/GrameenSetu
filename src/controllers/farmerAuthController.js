@@ -39,6 +39,13 @@ exports.requestOtp = async (req, res) => {
       await sendOtpEmail(email, otp);
     } catch (mailErr) {
       console.error('OTP email send failed:', mailErr);
+      if (process.env.OTP_FALLBACK === 'true') {
+        return res.json({
+          message: 'OTP generated (email delivery skipped)',
+          otp,
+          expiresInMinutes: 10
+        });
+      }
       return res.status(502).json({ message: 'Email service unavailable. Please try again later.' });
     }
 
