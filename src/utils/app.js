@@ -4,11 +4,15 @@ const morgan = require('morgan');
 const connectDB = require('../config/db');
 const authRoutes = require('../routes/auth');
 const errorHandler = require('../middleware/errorHandler');
+const { sendOtpEmail } = require('../utils/sendEmail');
 
 require('dotenv').config();
 
 const app = express();
 connectDB();
+
+console.log('EMAIL:', process.env.NOTIFY_EMAIL);
+console.log('PASS EXISTS:', !!process.env.NOTIFY_EMAIL_PASS);
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -31,6 +35,16 @@ app.use('/api/notifications', require('../routes/notification'));
 
 
 app.get('/', (req, res) => res.send('welcome to server'));
+
+app.get('/test-email', async (req, res) => {
+  try {
+    await sendOtpEmail('your_email@gmail.com', '123456');
+    res.send('Email sent');
+  } catch (err) {
+    console.error(err);
+    res.send('Email failed');
+  }
+});
 
 
 app.use('/api/auth', authRoutes);
