@@ -1,52 +1,33 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-let cachedTransporter = null;
+let resendClient = null;
 
-const buildTransporter = () => {
-  const host = process.env.NOTIFY_EMAIL_HOST || 'smtp.gmail.com';
-  const port = process.env.NOTIFY_EMAIL_PORT
-    ? Number(process.env.NOTIFY_EMAIL_PORT)
-    : 465;
-  const secure = process.env.NOTIFY_EMAIL_SECURE
-    ? process.env.NOTIFY_EMAIL_SECURE === 'true'
-    : port === 465;
-  const service = process.env.NOTIFY_EMAIL_SERVICE;
-
-  const transportOptions = service
-    ? { service }
-    : { host, port, secure };
-
-  return nodemailer.createTransport({
-    ...transportOptions,
-    auth: {
-      user: process.env.NOTIFY_EMAIL,
-      pass: process.env.NOTIFY_EMAIL_PASS
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 20000
-  });
-};
-
-const getTransporter = () => {
-  if (!cachedTransporter) {
-    cachedTransporter = buildTransporter();
+const getResendClient = () => {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
   }
-  return cachedTransporter;
+  return resendClient;
 };
 
 const getFromAddress = () => {
-  return process.env.NOTIFY_EMAIL_FROM || process.env.NOTIFY_EMAIL;
+  return process.env.RESEND_FROM || process.env.NOTIFY_EMAIL;
+};
+
+const ensureResendConfigured = () => {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('Resend API key not configured');
+  }
+  if (!getFromAddress()) {
+    throw new Error('Resend from address not configured');
+  }
 };
 
 exports.sendOtpEmail = async (toEmail, otp) => {
-  if (!process.env.NOTIFY_EMAIL || !process.env.NOTIFY_EMAIL_PASS) {
-    throw new Error('Email credentials not configured');
-  }
-  const transporter = getTransporter();
-  await transporter.sendMail({
+  ensureResendConfigured();
+  const resend = getResendClient();
+  await resend.emails.send({
     from: `"GrameenSetu" <${getFromAddress()}>`,
-    to: toEmail,
+    to: [toEmail],
     subject: 'GrameenSetu Login OTP',
     html: `
       <h2>GrameenSetu Login</h2>
@@ -61,13 +42,11 @@ exports.sendOtpEmail = async (toEmail, otp) => {
 
 exports.sendEmail = async (toEmail, subject, message) => {
   try {
-    if (!process.env.NOTIFY_EMAIL || !process.env.NOTIFY_EMAIL_PASS) {
-      throw new Error('Email credentials not configured');
-    }
-    const transporter = getTransporter();
-    await transporter.sendMail({
+    ensureResendConfigured();
+    const resend = getResendClient();
+    await resend.emails.send({
       from: `"GrameenSetu" <${getFromAddress()}>`,
-      to: toEmail,
+      to: [toEmail],
       subject: subject,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
