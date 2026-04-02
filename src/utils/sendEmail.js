@@ -15,6 +15,18 @@ const getFromAddress = () => {
   return process.env.RESEND_FROM || DEFAULT_FROM;
 };
 
+const formatFromAddress = (fromValue) => {
+  const value = typeof fromValue === 'string' ? fromValue.trim() : '';
+  if (!value) {
+    return '';
+  }
+  // If user already provided "Name <email>" format, use it as-is.
+  if (value.includes('<') && value.includes('>')) {
+    return value;
+  }
+  return `"GrameenSetu" <${value}>`;
+};
+
 const ensureResendConfigured = () => {
   if (!process.env.RESEND_API_KEY) {
     throw new Error('Resend API key not configured');
@@ -43,7 +55,7 @@ const sendResendEmail = async ({ to, subject, html }) => {
 
   const resend = getResendClient();
   const { data, error } = await resend.emails.send({
-    from: `"GrameenSetu" <${getFromAddress()}>`,
+    from: formatFromAddress(getFromAddress()),
     to: normalizeTo(to),
     subject,
     html
