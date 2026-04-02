@@ -1,5 +1,7 @@
 const { Resend } = require('resend');
 
+const DEFAULT_FROM = 'onboarding@resend.dev';
+
 let resendClient = null;
 
 const getResendClient = () => {
@@ -10,24 +12,55 @@ const getResendClient = () => {
 };
 
 const getFromAddress = () => {
-  return process.env.RESEND_FROM || process.env.NOTIFY_EMAIL;
+  return process.env.RESEND_FROM || DEFAULT_FROM;
 };
 
 const ensureResendConfigured = () => {
   if (!process.env.RESEND_API_KEY) {
     throw new Error('Resend API key not configured');
   }
-  if (!getFromAddress()) {
-    throw new Error('Resend from address not configured');
+};
+
+const normalizeTo = (toEmail) => {
+  if (Array.isArray(toEmail)) {
+    return toEmail;
+  }
+  return [toEmail];
+};
+
+const requireField = (value, name) => {
+  if (!value || (typeof value === 'string' && value.trim().length === 0)) {
+    throw new Error(`Missing required field: ${name}`);
   }
 };
 
-exports.sendOtpEmail = async (toEmail, otp) => {
+const sendResendEmail = async ({ to, subject, html }) => {
   ensureResendConfigured();
+  requireField(getFromAddress(), 'from');
+  requireField(to, 'to');
+  requireField(subject, 'subject');
+  requireField(html, 'html');
+
   const resend = getResendClient();
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: `"GrameenSetu" <${getFromAddress()}>`,
-    to: [toEmail],
+    to: normalizeTo(to),
+    subject,
+    html
+  });
+
+  if (error) {
+    const resendError = new Error(error.message || 'Resend email error');
+    resendError.resend = error;
+    throw resendError;
+  }
+
+  return data;
+};
+
+exports.sendOtpEmail = async (toEmail, otp) => {
+  await sendResendEmail({
+    to: toEmail,
     subject: 'GrameenSetu Login OTP',
     html: `
       <h2>GrameenSetu Login</h2>
@@ -42,12 +75,9 @@ exports.sendOtpEmail = async (toEmail, otp) => {
 
 exports.sendEmail = async (toEmail, subject, message) => {
   try {
-    ensureResendConfigured();
-    const resend = getResendClient();
-    await resend.emails.send({
-      from: `"GrameenSetu" <${getFromAddress()}>`,
-      to: [toEmail],
-      subject: subject,
+    await sendResendEmail({
+      to: toEmail,
+      subject,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>GrameenSetu</h2>
@@ -57,6 +87,10 @@ exports.sendEmail = async (toEmail, subject, message) => {
       `
     });
   } catch (err) {
-    console.error('Email send error:', err);
+    console.error('Email send error:', {
+      message: err?.message,
+      resend: err?.resend
+    });
+    throw err;
   }
 };
